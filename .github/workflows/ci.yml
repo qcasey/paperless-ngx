@@ -374,6 +374,7 @@ jobs:
         name: Append Changelog to docs
         id: append-Changelog
         run: |
+          touch docs/changelog-new.md
           echo -e "# Changelog\n\n${{ steps.create-release.outputs.body }}\n" > docs/changelog-new.md
           CURRENT_CHANGELOG=`tail --lines +2 docs/changelog.md`
           echo -e "$CURRENT_CHANGELOG" >> docs/changelog-new.md
