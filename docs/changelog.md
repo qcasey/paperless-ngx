@@ -612,7 +612,7 @@ This release contains new database migrations.
   configuration file and adapt the reference to the ASGI application
   as follows:
 
-  ```{.}
+  ```
   ExecStart=/opt/paperless/.local/bin/gunicorn -c /opt/paperless/gunicorn.conf.py paperless.asgi:application
   ```
 
