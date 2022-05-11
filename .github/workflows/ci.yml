@@ -381,14 +381,11 @@ jobs:
           echo -e "# Changelog\n\n${{ steps.create-release.outputs.body }}\n" > changelog-new.md
           CURRENT_CHANGELOG=`tail --lines +2 changelog.md`
           echo -e "$CURRENT_CHANGELOG" >> changelog-new.md
-          mv changelog-new.md changelog.md
-      -
-        name: Commit Changelog
-        uses: EndBug/add-and-commit@v9
-        with:
-          add: 'docs/changelog.md'
-          message: 'Changelog ${{ steps.get_version.outputs.version }} - Github Actions'
-          push: origin HEAD:main
+          mv changelog-new.md changelog.
+          git config --global user.name "Github Actions"
+          git config --global user.email "hello@paperless-ngx.com"
+          git commit -am "Changelog ${{ steps.get_version.outputs.version }} - Github Actions"
+          git push
       -
         name: Upload release archive
         id: upload-release-asset
