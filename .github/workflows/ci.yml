@@ -385,7 +385,7 @@ jobs:
           git config --global user.name "Github Actions"
           git config --global user.email "hello@paperless-ngx.com"
           git commit -am "Changelog ${{ steps.get_version.outputs.version }} - Github Actions"
-          git push
+          git push origin HEAD:main
       -
         name: Upload release archive
         id: upload-release-asset
