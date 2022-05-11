@@ -371,11 +371,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
         name: Append Changelog to docs
         id: append-Changelog
         working-directory: docs
         run: |
-          touch changelog-new.md
           echo -e "# Changelog\n\n${{ steps.create-release.outputs.body }}\n" > changelog-new.md
           CURRENT_CHANGELOG=`tail --lines +2 changelog.md`
           echo -e "$CURRENT_CHANGELOG" >> changelog-new.md
