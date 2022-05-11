@@ -388,6 +388,7 @@ jobs:
         with:
           add: 'docs/changelog.md'
           message: 'Changelog ${{ steps.get_version.outputs.version }} - Github Actions'
+          push: origin HEAD:${{ github.head_ref }}
       -
         name: Upload release archive
         id: upload-release-asset
