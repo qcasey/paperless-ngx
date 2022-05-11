@@ -374,7 +374,10 @@ jobs:
         name: Append Changelog to docs
         id: append-Changelog
         run: |
-          sed -i '3i\${{ steps.create-release.outputs.body }}\n' docs/changelog.md
+          echo -e "# Changelog\n\n${{ steps.create-release.outputs.body }}\n" > docs/changelog-new.md
+          CURRENT_CHANGELOG=`tail --lines +2 docs/changelog.md`
+          echo -e "$CURRENT_CHANGELOG" >> docs/changelog-new.md
+          mv docs/changelog-new.md docs/changelog.md
       -
         name: Commit Changelog
         uses: EndBug/add-and-commit@v9
