@@ -381,7 +381,7 @@ jobs:
           echo -e "# Changelog\n\n${{ steps.create-release.outputs.body }}\n" > changelog-new.md
           CURRENT_CHANGELOG=`tail --lines +2 changelog.md`
           echo -e "$CURRENT_CHANGELOG" >> changelog-new.md
-          mv changelog-new.md changelog.
+          mv changelog-new.md changelog.md
           git config --global user.name "Github Actions"
           git config --global user.email "hello@paperless-ngx.com"
           git commit -am "Changelog ${{ steps.get_version.outputs.version }} - Github Actions"
