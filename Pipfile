@@ -53,6 +53,7 @@ concurrent-log-handler = "*"
 zipp = {version = "*", markers = "python_version < '3.9'"}
 pyzbar = "*"
 pdf2image = "*"
+myst-parser = "*"
 
 [dev-packages]
 coveralls = "*"
