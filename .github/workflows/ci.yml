@@ -378,7 +378,8 @@ jobs:
         id: append-Changelog
         working-directory: docs
         run: |
-          git checkout main
+          git status
+          git checkout origin/main
           git pull
           echo -e "# Changelog\n\n${{ steps.create-release.outputs.body }}\n" > changelog-new.md
           CURRENT_CHANGELOG=`tail --lines +2 changelog.md`
