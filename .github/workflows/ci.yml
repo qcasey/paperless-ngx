@@ -379,8 +379,8 @@ jobs:
         working-directory: docs
         run: |
           git status
-          git pull
-          git checkout origin/main
+          git pull origin main
+          git checkout main
           echo -e "# Changelog\n\n${{ steps.create-release.outputs.body }}\n" > changelog-new.md
           CURRENT_CHANGELOG=`tail --lines +2 changelog.md`
           echo -e "$CURRENT_CHANGELOG" >> changelog-new.md
