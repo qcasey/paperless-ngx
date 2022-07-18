@@ -1,9 +1,12 @@
+import datetime
 import json
 import math
 import multiprocessing
 import os
 import re
 from typing import Final
+from typing import Optional
+from typing import Set
 from urllib.parse import urlparse
 
 from concurrent_log_handler.queue import setup_logging_queues
@@ -44,6 +47,13 @@ def __get_int(key: str, default: int) -> int:
     Return an integer value based on the environment variable or a default
     """
     return int(os.getenv(key, default))
+
+
+def __get_float(key: str, default: float) -> float:
+    """
+    Return an integer value based on the environment variable or a default
+    """
+    return float(os.getenv(key, default))
 
 
 # NEVER RUN WITH DEBUG IN PRODUCTION.
@@ -415,27 +425,7 @@ LOGGING = {
 # Task queue                                                                  #
 ###############################################################################
 
-
-# Sensible defaults for multitasking:
-# use a fair balance between worker processes and threads epr worker so that
-# both consuming many documents in parallel and consuming large documents is
-# reasonably fast.
-# Favors threads per worker on smaller systems and never exceeds cpu_count()
-# in total.
-
-
-def default_task_workers() -> int:
-    # always leave one core open
-    available_cores = max(multiprocessing.cpu_count(), 1)
-    try:
-        if available_cores < 4:
-            return available_cores
-        return max(math.floor(math.sqrt(available_cores)), 1)
-    except NotImplementedError:
-        return 1
-
-
-TASK_WORKERS = __get_int("PAPERLESS_TASK_WORKERS", default_task_workers())
+TASK_WORKERS = __get_int("PAPERLESS_TASK_WORKERS", 1)
 
 PAPERLESS_WORKER_TIMEOUT: Final[int] = __get_int("PAPERLESS_WORKER_TIMEOUT", 1800)
 
@@ -448,12 +438,14 @@ PAPERLESS_WORKER_RETRY: Final[int] = __get_int(
 
 Q_CLUSTER = {
     "name": "paperless",
+    "guard_cycle": 5,
     "catch_up": False,
     "recycle": 1,
     "retry": PAPERLESS_WORKER_RETRY,
     "timeout": PAPERLESS_WORKER_TIMEOUT,
     "workers": TASK_WORKERS,
     "redis": os.getenv("PAPERLESS_REDIS", "redis://localhost:6379"),
+    "log_level": "DEBUG" if DEBUG else "INFO",
 }
 
 
@@ -483,6 +475,11 @@ CONSUMER_POLLING_RETRY_COUNT = int(
     os.getenv("PAPERLESS_CONSUMER_POLLING_RETRY_COUNT", 5),
 )
 
+CONSUMER_INOTIFY_DELAY: Final[float] = __get_float(
+    "PAPERLESS_CONSUMER_INOTIFY_DELAY",
+    0.5,
+)
+
 CONSUMER_DELETE_DUPLICATES = __get_boolean("PAPERLESS_CONSUMER_DELETE_DUPLICATES")
 
 CONSUMER_RECURSIVE = __get_boolean("PAPERLESS_CONSUMER_RECURSIVE")
@@ -508,8 +505,6 @@ CONSUMER_BARCODE_TIFF_SUPPORT = __get_boolean(
 )
 
 CONSUMER_BARCODE_STRING = os.getenv("PAPERLESS_CONSUMER_BARCODE_STRING", "PATCHT")
-
-OPTIMIZE_THUMBNAILS = __get_boolean("PAPERLESS_OPTIMIZE_THUMBNAILS", "true")
 
 OCR_PAGES = int(os.getenv("PAPERLESS_OCR_PAGES", 0))
 
@@ -537,10 +532,9 @@ OCR_ROTATE_PAGES_THRESHOLD = float(
     os.getenv("PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD", 12.0),
 )
 
-OCR_MAX_IMAGE_PIXELS = os.environ.get(
-    "PAPERLESS_OCR_MAX_IMAGE_PIXELS",
-    256000000,
-)
+OCR_MAX_IMAGE_PIXELS: Optional[int] = None
+if os.environ.get("PAPERLESS_OCR_MAX_IMAGE_PIXELS") is not None:
+    OCR_MAX_IMAGE_PIXELS: int = int(os.environ.get("PAPERLESS_OCR_MAX_IMAGE_PIXELS"))
 
 OCR_USER_ARGS = os.getenv("PAPERLESS_OCR_USER_ARGS", "{}")
 
@@ -553,8 +547,6 @@ CONVERT_TMPDIR = os.getenv("PAPERLESS_CONVERT_TMPDIR")
 CONVERT_MEMORY_LIMIT = os.getenv("PAPERLESS_CONVERT_MEMORY_LIMIT")
 
 GS_BINARY = os.getenv("PAPERLESS_GS_BINARY", "gs")
-
-OPTIPNG_BINARY = os.getenv("PAPERLESS_OPTIPNG_BINARY", "optipng")
 
 
 # Pre-2.x versions of Paperless stored your documents locally with GPG
@@ -583,15 +575,22 @@ FILENAME_PARSE_TRANSFORMS = []
 for t in json.loads(os.getenv("PAPERLESS_FILENAME_PARSE_TRANSFORMS", "[]")):
     FILENAME_PARSE_TRANSFORMS.append((re.compile(t["pattern"]), t["repl"]))
 
-# TODO: this should not have a prefix.
 # Specify the filename format for out files
-PAPERLESS_FILENAME_FORMAT = os.getenv("PAPERLESS_FILENAME_FORMAT")
+FILENAME_FORMAT = os.getenv("PAPERLESS_FILENAME_FORMAT")
+
+# If this is enabled, variables in filename format will resolve to empty-string instead of 'none'.
+# Directories with 'empty names' are omitted, too.
+FILENAME_FORMAT_REMOVE_NONE = __get_boolean(
+    "PAPERLESS_FILENAME_FORMAT_REMOVE_NONE",
+    "NO",
+)
 
 THUMBNAIL_FONT_NAME = os.getenv(
     "PAPERLESS_THUMBNAIL_FONT_NAME",
     "/usr/share/fonts/liberation/LiberationSerif-Regular.ttf",
 )
 
+# TODO: this should not have a prefix.
 # Tika settings
 PAPERLESS_TIKA_ENABLED = __get_boolean("PAPERLESS_TIKA_ENABLED", "NO")
 PAPERLESS_TIKA_ENDPOINT = os.getenv("PAPERLESS_TIKA_ENDPOINT", "http://localhost:9998")
@@ -603,16 +602,42 @@ PAPERLESS_TIKA_GOTENBERG_ENDPOINT = os.getenv(
 if PAPERLESS_TIKA_ENABLED:
     INSTALLED_APPS.append("paperless_tika.apps.PaperlessTikaConfig")
 
-# List dates that should be ignored when trying to parse date from document text
-IGNORE_DATES = set()
 
-if os.getenv("PAPERLESS_IGNORE_DATES", ""):
+def _parse_ignore_dates(
+    env_ignore: str,
+    date_order: str = DATE_ORDER,
+) -> Set[datetime.datetime]:
+    """
+    If the PAPERLESS_IGNORE_DATES environment variable is set, parse the
+    user provided string(s) into dates
+
+    Args:
+        env_ignore (str): The value of the environment variable, comma seperated dates
+        date_order (str, optional): The format of the date strings. Defaults to DATE_ORDER.
+
+    Returns:
+        Set[datetime.datetime]: The set of parsed date objects
+    """
     import dateparser
 
-    for s in os.getenv("PAPERLESS_IGNORE_DATES", "").split(","):
-        d = dateparser.parse(s)
+    ignored_dates = set()
+    for s in env_ignore.split(","):
+        d = dateparser.parse(
+            s,
+            settings={
+                "DATE_ORDER": date_order,
+            },
+        )
         if d:
-            IGNORE_DATES.add(d.date())
+            ignored_dates.add(d.date())
+    return ignored_dates
+
+
+# List dates that should be ignored when trying to parse date from document text
+IGNORE_DATES: Set[datetime.date] = set()
+
+if os.getenv("PAPERLESS_IGNORE_DATES") is not None:
+    IGNORE_DATES = _parse_ignore_dates(os.getenv("PAPERLESS_IGNORE_DATES"))
 
 ENABLE_UPDATE_CHECK = os.getenv("PAPERLESS_ENABLE_UPDATE_CHECK", "default")
 if ENABLE_UPDATE_CHECK != "default":
