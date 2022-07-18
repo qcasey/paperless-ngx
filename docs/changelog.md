@@ -1,5 +1,13 @@
 # Changelog
 
+## paperless-ngx 1.8.1
+
+### Features
+
+- Fix body, add labels [@qcasey](https://github.com/qcasey) ([#52](https://github.com/qcasey/paperless-ngx/pull/52))
+
+
+
 ## paperless-ngx 1.7.1
 
 ### Features
