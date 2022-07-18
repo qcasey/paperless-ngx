@@ -357,7 +357,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - publish-release
-    if: ${{ !(needs.publish-release.outputs.prerelease) }}
+    if: ${{ needs.publish-release.outputs.prerelease == false }}
     steps:
       -
         name: Checkout
