@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import tempfile
+import time
 import urllib
 import uuid
 import zipfile
@@ -336,9 +337,14 @@ class DocumentViewSet(
 
         classifier = load_classifier()
 
+        tic = time.perf_counter()
         gen = parse_date_generator(doc.filename, doc.content)
         dates = sorted(
             {i for i in itertools.islice(gen, settings.NUMBER_OF_SUGGESTED_DATES)},
+        )
+        logger.debug(
+            f"Found dates in {time.perf_counter() - tic:0.4f} seconds",
+            extra={"group": None},
         )
 
         return Response(
