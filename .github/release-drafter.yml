@@ -27,13 +27,14 @@ categories:
       - 'deployment'
       - 'translation'
       - 'ci-cd'
-  - title: 'Other'
-    labels:
-      - 'frontend'
-      - 'backend'
   - title: 'Dependencies'
     collapse-after: 3
     label: 'dependencies'
+  - title: 'All App Changes'
+    labels:
+      - 'frontend'
+      - 'backend'
+    collapse-after: 0
 include-labels:
   - 'enhancement'
   - 'bug'
