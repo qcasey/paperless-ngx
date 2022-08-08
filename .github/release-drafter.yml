@@ -26,6 +26,7 @@ categories:
       - 'chore'
       - 'deployment'
       - 'translation'
+      - 'ci-cd'
   - title: 'Other'
     labels:
       - 'frontend'
@@ -43,6 +44,7 @@ include-labels:
   - 'documentation'
   - 'frontend'
   - 'backend'
+  - 'ci-cd'
 replacers: # Changes "Feature: Update checker" to "Update checker"
   - search: '/Feature:|Feat:|\[feature\]/gi'
     replace: ''
