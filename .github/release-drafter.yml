@@ -26,6 +26,10 @@ categories:
       - 'chore'
       - 'deployment'
       - 'translation'
+  - title: 'Other'
+    labels:
+      - 'frontend'
+      - 'backend'
   - title: 'Dependencies'
     collapse-after: 3
     label: 'dependencies'
@@ -37,6 +41,8 @@ include-labels:
   - 'translation'
   - 'dependencies'
   - 'documentation'
+  - 'frontend'
+  - 'backend'
 replacers: # Changes "Feature: Update checker" to "Update checker"
   - search: '/Feature:|Feat:|\[feature\]/gi'
     replace: ''
