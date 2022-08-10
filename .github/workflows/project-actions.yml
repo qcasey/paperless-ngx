@@ -30,7 +30,7 @@ jobs:
       - name: Set issue status to ${{ env.todo }}
         uses: leonsteinhaeuser/project-beta-automations@v1.2.1
         with:
-          gh_token: ${{ secrets.GH_TOKEN }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           organization: paperless-ngx
           project_id: 2
           resource_node_id: ${{ github.event.issue.node_id }}
@@ -39,8 +39,6 @@ jobs:
     name: pr_opened_or_reopened
     runs-on: ubuntu-latest
     permissions:
-      # write permission is required to create a github release
-      contents: write
       # write permission is required for autolabeler
       # otherwise, read permission is required at least
       pull-requests: write
@@ -49,7 +47,7 @@ jobs:
       - name: Set PR status to ${{ env.in_progress }}
         uses: leonsteinhaeuser/project-beta-automations@v1.2.1
         with:
-          gh_token: ${{ secrets.GH_TOKEN }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           organization: paperless-ngx
           project_id: 2
           resource_node_id: ${{ github.event.pull_request.node_id }}
