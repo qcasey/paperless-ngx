@@ -11,7 +11,7 @@
 
 <!-- omit in toc -->
 
-test
+test -- 1
 
 # Paperless-ngx
 
@@ -22,8 +22,10 @@ Paperless-ngx forked from [paperless-ng](https://github.com/jonaswinkler/paperle
 
 A demo is available at [demo.paperless-ngx.com](https://demo.paperless-ngx.com) using login `demo` / `demo`. _Note: demo content is reset frequently and confidential information should not be uploaded._
 
+- [Paperless-ngx](#paperless-ngx)
 - [Features](#features)
 - [Getting started](#getting-started)
+  - [Documentation](#documentation)
 - [Contributing](#contributing)
   - [Community Support](#community-support)
   - [Translation](#translation)
