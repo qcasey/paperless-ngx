@@ -1,5 +1,18 @@
 # Changelog
 
+## paperless-ngx 1.8.8
+
+### s
+
+- Manually link authors only in docs/changelog.md @qcasey ([#87](https://github.com/qcasey/paperless-ngx/pull/87))
+
+### Bug Fixes
+
+- Manually link authors only in docs/changelog.md @qcasey ([#87](https://github.com/qcasey/paperless-ngx/pull/87))
+- Fix release drafter @qcasey ([#85](https://github.com/qcasey/paperless-ngx/pull/85))
+
+
+
 ## paperless-ngx 1.8.7
 
 ### Features
