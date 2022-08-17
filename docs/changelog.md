@@ -1,5 +1,13 @@
 # Changelog
 
+## paperless-ngx 1.8.7
+
+### Features
+
+-  Commit from dev branch [@qcasey](https://github.com/qcasey) ([#75](https://github.com/qcasey/paperless-ngx/pull/75))
+
+
+
 ## paperless-ngx 1.8.0
 
 ### Features
