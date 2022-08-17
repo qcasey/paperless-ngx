@@ -1,5 +1,13 @@
 # Changelog
 
+## paperless-ngx 1.8.9
+
+### Bug Fixes
+
+- Fix release drafter [@qcasey](https://github.com/qcasey) ([#90](https://github.com/qcasey/paperless-ngx/pull/90))
+
+
+
 ## paperless-ngx 1.8.8
 
 ### s
